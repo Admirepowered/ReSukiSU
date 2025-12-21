@@ -6,6 +6,7 @@ on:
     paths:
       - 'manager/app/src/main/res/values/strings.xml'
       - 'manager/app/src/main/res/values-*/strings.xml'
+      - '.github/workflows/crowdin.yml'
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
@@ -30,7 +31,7 @@ jobs:
         create_pull_request: true
         localization_branch_name: "Crowdin"
         pull_request_labels: 'enhancement, translation'
-        pull_request_title: 'opt: sync translation from Crowdin'
+        pull_request_title: 'manager: sync translation from Crowdin'
 
         config: 'crowdin.yml'
         crowdin_branch_name: "main"
