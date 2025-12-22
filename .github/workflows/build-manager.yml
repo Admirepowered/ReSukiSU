@@ -195,6 +195,7 @@ jobs:
           $MSG
           MESSAGE_EOF
           EOF
+          echo "URL=${{ github.server_url }}/${{ github.repository }}/commit/$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Determine manager variant
         id: determine
