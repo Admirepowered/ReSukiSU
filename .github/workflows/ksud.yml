@@ -51,15 +51,15 @@ jobs:
         targets: ${{ inputs.target }}
         components: rust-src
         
-    - name: Setup cargo-ndk
-      run: cargo install cargo-ndk --locked
-        
     - uses: Swatinem/rust-cache@v2
       if: github.event_name != 'pull_request'
       with:
         prefix-key: ksud-${{ inputs.target }}-rust
         workspaces: userspace/ksud
-
+        
+    - name: Setup cargo-ndk
+      run: cargo install cargo-ndk --locked
+        
     - name: Build ksud
       run: |
         cd userspace/ksud/
