@@ -20,7 +20,6 @@ uid_t ksu_manager_appid = KSU_INVALID_APPID;
 static uid_t locked_manager_uid = KSU_INVALID_APPID;
 static uid_t locked_dynamic_manager_uid = KSU_INVALID_APPID;
 
-#define KSU_UID_LIST_PATH "/data/misc/user_uid/uid_list"
 #define SYSTEM_PACKAGES_LIST_PATH "/data/system/packages.list"
 
 struct uid_data {
@@ -28,83 +27,6 @@ struct uid_data {
     u32 uid;
     char package[KSU_MAX_PACKAGE_NAME];
 };
-
-// Try read /data/misc/user_uid/uid_list
-static int uid_from_um_list(struct list_head *uid_list)
-{
-    struct file *fp;
-    char *buf = NULL;
-    loff_t size, pos = 0;
-    ssize_t nr;
-    int cnt = 0;
-
-    fp = filp_open(KSU_UID_LIST_PATH, O_RDONLY, 0);
-    if (IS_ERR(fp))
-        return -ENOENT;
-
-    size = fp->f_inode->i_size;
-    if (size <= 0) {
-        filp_close(fp, NULL);
-        return -ENODATA;
-    }
-
-    buf = kzalloc(size + 1, GFP_ATOMIC);
-    if (!buf) {
-        pr_err("uid_list: OOM %lld B\n", size);
-        filp_close(fp, NULL);
-        return -ENOMEM;
-    }
-
-    nr = kernel_read(fp, buf, size, &pos);
-    filp_close(fp, NULL);
-    if (nr != size) {
-        pr_err("uid_list: short read %zd/%lld\n", nr, size);
-        kfree(buf);
-        return -EIO;
-    }
-    buf[size] = '\0';
-
-    for (char *line = buf, *next; line; line = next) {
-        next = strchr(line, '\n');
-        if (next)
-            *next++ = '\0';
-
-        while (*line == ' ' || *line == '\t' || *line == '\r')
-            ++line;
-        if (!*line)
-            continue;
-
-        char *uid_str = strsep(&line, " \t");
-        char *pkg = line;
-        if (!pkg)
-            continue;
-        while (*pkg == ' ' || *pkg == '\t')
-            ++pkg;
-        if (!*pkg)
-            continue;
-
-        u32 uid;
-        if (kstrtou32(uid_str, 10, &uid)) {
-            pr_warn_once("uid_list: bad uid <%s>\n", uid_str);
-            continue;
-        }
-
-        struct uid_data *d = kzalloc(sizeof(*d), GFP_ATOMIC);
-        if (unlikely(!d)) {
-            pr_err("uid_list: OOM uid=%u\n", uid);
-            continue;
-        }
-
-        d->uid = uid;
-        strscpy(d->package, pkg, KSU_MAX_PACKAGE_NAME);
-        list_add_tail(&d->list, uid_list);
-        ++cnt;
-    }
-
-    kfree(buf);
-    pr_info("uid_list: loaded %d entries\n", cnt);
-    return cnt > 0 ? 0 : -ENODATA;
-}
 
 static int get_pkg_from_apk_path(char *pkg, const char *path)
 {
@@ -451,18 +373,6 @@ void track_throne(bool prune_only)
 
     // init uid list head
     INIT_LIST_HEAD(&uid_list);
-
-    if (ksu_uid_scanner_enabled) {
-        pr_info("Scanning %s directory..\n", KSU_UID_LIST_PATH);
-
-        if (uid_from_um_list(&uid_list) == 0) {
-            pr_info("Loaded UIDs from %s success\n", KSU_UID_LIST_PATH);
-            goto uid_ready;
-        }
-
-        pr_warn("%s read failed, fallback to %s\n", KSU_UID_LIST_PATH,
-                SYSTEM_PACKAGES_LIST_PATH);
-    }
 
     {
         fp = filp_open(SYSTEM_PACKAGES_LIST_PATH, O_RDONLY, 0);
