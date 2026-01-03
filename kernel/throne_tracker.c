@@ -15,7 +15,6 @@
 #include "apk_sign.h"
 #include "dynamic_manager.h"
 
-
 uid_t ksu_manager_appid = KSU_INVALID_APPID;
 static uid_t locked_manager_uid = KSU_INVALID_APPID;
 static uid_t locked_dynamic_manager_uid = KSU_INVALID_APPID;

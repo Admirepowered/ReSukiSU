@@ -10,7 +10,6 @@
 #include "ksu.h"
 #include "throne_tracker.h"
 
-
 #define MASK_SYSTEM (FS_CREATE | FS_MOVE | FS_EVENT_ON_CHILD)
 
 struct watch_dir {
