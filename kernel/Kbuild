@@ -55,6 +55,13 @@ else
   KSU_SRC := $(srctree)/$(src)
 endif
 
+KDIR := $(KDIR)
+MDIR := $(realpath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+
+ifneq ($(KDIR),)
+  KSU_SRC := $(MDIR)
+endif
+
 LOCAL_GIT_EXISTS := $(shell test -e $(KSU_SRC)/../.git && echo 1 || echo 0)
 
 ifeq ($(LOCAL_GIT_EXISTS),0)
