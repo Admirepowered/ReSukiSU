@@ -420,7 +420,6 @@ void track_throne(bool prune_only)
         filp_close(fp, 0);
     }
 
-uid_ready:
     if (prune_only)
         goto prune;
 
