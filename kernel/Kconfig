@@ -71,6 +71,15 @@ config KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
 	  in SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
 	  add a ksu_handle_sys_read calls in there
 
+config KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
+    bool "Automatically hook input hook by input_handler"
+       depends on KSU_MANUAL_HOOK
+       default y
+       help
+         If turn off this option, you need checkout to drivers/input/input.c
+         in void input_event(struct input_dev *dev, unsigned int type, unsigned int code, int value)
+         add a ksu_handle_input_handle_event calls in there
+
 menu "KernelSU - SUSFS"
 config KSU_SUSFS
     bool "KernelSU addon - SUSFS"
