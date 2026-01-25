@@ -28,6 +28,7 @@
 #include <linux/namei.h>
 #include <linux/workqueue.h>
 #include <linux/uio.h>
+#include <linux/module.h>
 
 #include "manager.h"
 #include "allowlist.h"
